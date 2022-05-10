@@ -4,11 +4,34 @@ import string
 from notion_client import Client
 
 
-class DBHandler:
+class TaskDBHandler:
     def __init__(self, notion_token):
         self.notion_token = notion_token
         self.notion = Client(auth=self.notion_token)
         self.today = datetime.date.today()
+
+    def get_change_history(self, get_history_minutes: string):
+        now = datetime.datetime.now().astimezone(datetime.timezone.utc)
+        db = self.notion.search(
+            **{
+                "sort": {
+                    "direction": "descending",
+                    "timestamp": "last_edited_time"
+                },
+                "filter": {
+                    "value": "page",
+                    "property": "object"
+                },
+                "page_size": 100,
+            }
+        )
+        history_list = []
+        for history in db['results']:
+            last_edited_time = datetime.datetime.fromisoformat(history['last_edited_time'].replace('Z', '+00:00'))
+            dt = now - datetime.timedelta(minutes=int(get_history_minutes))
+            if dt < last_edited_time:
+                history_list.append(history)
+        return history_list
 
     def get_deadline_task(self, db_id: string, deadline: string):
         db = self.notion.databases.query(
@@ -45,6 +68,10 @@ class DBHandler:
         return db_result['properties']['期日']['date']['start']
 
     @staticmethod
+    def task_status(db_result):
+        return db_result['properties']['ステータス']['select']['name']
+
+    @staticmethod
     def get_task_manager_name(db_result):
         req_manager_list = db_result['properties']['担当者']['people']
         manager_list = []
@@ -55,6 +82,10 @@ class DBHandler:
                 print('no name in manager')
 
         return manager_list
+
+    @staticmethod
+    def get_last_edited_time(db_result):
+        return db_result['last_edited_time']
 
     @staticmethod
     def get_task_reviewer_name(db_result):
