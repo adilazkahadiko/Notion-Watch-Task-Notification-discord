@@ -14,6 +14,7 @@ class Message:
                        f"\n期日：{self.db_handler.get_task_deadline(result)}"
                        f"\nタスクの残り期日が3日以内です。"
                        f"\n作業の進捗を確認して、期日以内の完了が難しければ{self.PdM_name}に相談してください。"
+                       f"\nタスクURL:{self.db_handler.get_task_url(result)}"
         }
         return content
 
@@ -27,6 +28,7 @@ class Message:
                        f"\n期日：{self.db_handler.get_task_deadline(result)}"
                        f"\nあなた宛てに確認依頼タスクが更新されました。"
                        f"\n確認をお願いします。"
+                       f"\nタスクURL:{self.db_handler.get_task_url(result)}"
         }
         print(content)
         return content
@@ -41,6 +43,7 @@ class Message:
                        f"\n期日：{self.db_handler.get_task_deadline(result)}"
                        f"\nあなた宛てに確認FBでタスクが更新されました。"
                        f"\n確認、対応をお願いします。"
+                       f"\nタスクURL:{self.db_handler.get_task_url(result)}"
         }
         return content
 
